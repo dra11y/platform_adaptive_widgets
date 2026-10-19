@@ -4,6 +4,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+/// The default style per user override or fallback.
+enum DefaultWidgetStyle() {
+  /// Cupertino widgets
+  cupertino,
+
+  /// Android widgets
+  material,
+}
+
+/// User-overridable default widget style.
+DefaultWidgetStyle defaultWidgetStyle = .material;
+
 /// Base class for every platform-adaptive widget here.
 ///
 /// Override [buildMaterial] and [buildCupertino], never [build]. That one reads [defaultTargetPlatform]
@@ -18,8 +30,11 @@ abstract class const PlatformWidgetBase({super.key}) extends StatelessWidget {
   @nonVirtual
   Widget build(BuildContext context) => switch (defaultTargetPlatform) {
     .android => buildMaterial(context),
-    .iOS => buildCupertino(context),
-    _ => throw UnsupportedError('This platform is not supported: $defaultTargetPlatform'),
+    .iOS || .macOS => buildCupertino(context),
+    _ => switch (defaultWidgetStyle) {
+      DefaultWidgetStyle.material => buildMaterial(context),
+      DefaultWidgetStyle.cupertino => buildCupertino(context),
+    },
   };
 
   /// Builds the Android half.
